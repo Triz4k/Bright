@@ -47,7 +47,7 @@ end
 
 local function EnableBright()
     BrightEnabled = true
-    Lighting.Brightness = 30 
+    Lighting.Brightness = 10 
     Lighting.Ambient = Color3.new(0.8, 0.8, 0.8) 
     Lighting.OutdoorAmbient = Color3.new(0.8, 0.8, 0.8)  
     GlobalLight.Enabled = true  
