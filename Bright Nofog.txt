@@ -3,86 +3,87 @@ local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+-- Fog and Atmosphere Settings
 local FogEffectEnabled = false
 local OriginalFogEnd = Lighting.FogEnd
 local OriginalFogStart = Lighting.FogStart
 local OriginalFogColor = Lighting.FogColor
-local OriginalAtmosphereDensity = Lighting.Atmosphere.Density
-local OriginalAtmosphereGlare = Lighting.Atmosphere.Glare
-local OriginalAtmosphereHaze = Lighting.Atmosphere.Haze
+local OriginalAtmosphere = {
+    Density = Lighting.Atmosphere.Density,
+    Glare = Lighting.Atmosphere.Glare,
+    Haze = Lighting.Atmosphere.Haze
+}
 
+-- Brightness Settings
 local BrightEnabled = false
-local OriginalBrightness = Lighting.Brightness
-local OriginalAmbient = Lighting.Ambient
-local OriginalOutdoorAmbient = Lighting.OutdoorAmbient
+local OriginalLighting = {
+    Brightness = Lighting.Brightness,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient
+}
 
-local GlobalLight = Instance.new("PointLight")
-GlobalLight.Brightness = 5
-GlobalLight.Range = 1000
-GlobalLight.Shadows = false
+local GlobalLight = Instance.new("Part")
+GlobalLight.Name = "TRIZGlobalLight"
+GlobalLight.Anchored = true
+GlobalLight.CanCollide = false
+GlobalLight.Transparency = 1
 GlobalLight.Parent = workspace
-GlobalLight.Enabled = false
 
-local function DisableFogAndAtmosphere()
-    FogEffectEnabled = true
-    Lighting.FogEnd = 1000000 
-    Lighting.FogStart = 0
-    Lighting.FogColor = Color3.new(1, 1, 1) 
-    
-    Lighting.Atmosphere.Density = 0
-    Lighting.Atmosphere.Glare = 0
-    Lighting.Atmosphere.Haze = 0
+local LightInstance = Instance.new("PointLight")
+LightInstance.Brightness = 15
+LightInstance.Range = 2000
+LightInstance.Shadows = false
+LightInstance.Parent = GlobalLight
+
+-- Fog and Atmosphere Functions
+local function ToggleFogAndAtmosphere()
+    FogEffectEnabled = not FogEffectEnabled
+    if FogEffectEnabled then
+        Lighting.FogEnd = 9e9
+        Lighting.FogStart = 0
+        Lighting.FogColor = Color3.new(1, 1, 1)
+        Lighting.Atmosphere.Density = 0
+        Lighting.Atmosphere.Glare = 0
+        Lighting.Atmosphere.Haze = 0
+        print("Fog and Atmosphere Disabled")
+    else
+        Lighting.FogEnd = OriginalFogEnd
+        Lighting.FogStart = OriginalFogStart
+        Lighting.FogColor = OriginalFogColor
+        Lighting.Atmosphere.Density = OriginalAtmosphere.Density
+        Lighting.Atmosphere.Glare = OriginalAtmosphere.Glare
+        Lighting.Atmosphere.Haze = OriginalAtmosphere.Haze
+        print("Fog and Atmosphere Enabled")
+    end
 end
 
-local function EnableFogAndAtmosphere()
-    FogEffectEnabled = false
-    Lighting.FogEnd = OriginalFogEnd
-    Lighting.FogStart = OriginalFogStart
-    Lighting.FogColor = OriginalFogColor
-    
-    Lighting.Atmosphere.Density = OriginalAtmosphereDensity
-    Lighting.Atmosphere.Glare = OriginalAtmosphereGlare
-    Lighting.Atmosphere.Haze = OriginalAtmosphereHaze
+-- Brightness Functions
+local function ToggleBrightness()
+    BrightEnabled = not BrightEnabled
+    if BrightEnabled then
+        Lighting.Brightness = 5
+        Lighting.Ambient = Color3.new(0.9, 0.9, 0.9)
+        Lighting.OutdoorAmbient = Color3.new(0.9, 0.9, 0.9)
+        LightInstance.Enabled = true
+        print("Bright Effect Enabled")
+    else
+        Lighting.Brightness = OriginalLighting.Brightness
+        Lighting.Ambient = OriginalLighting.Ambient
+        Lighting.OutdoorAmbient = OriginalLighting.OutdoorAmbient
+        LightInstance.Enabled = false
+        print("Bright Effect Disabled")
+    end
 end
 
-local function EnableBright()
-    BrightEnabled = true
-    Lighting.Brightness = 10 
-    Lighting.Ambient = Color3.new(0.8, 0.8, 0.8) 
-    Lighting.OutdoorAmbient = Color3.new(0.8, 0.8, 0.8)  
-    GlobalLight.Enabled = true  
-end
-
-local function DisableBright()
-    BrightEnabled = false
-    Lighting.Brightness = OriginalBrightness
-    Lighting.Ambient = OriginalAmbient
-    Lighting.OutdoorAmbient = OriginalOutdoorAmbient
-    GlobalLight.Enabled = false 
-end
-
+-- Input Handlers
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.F5 and not gameProcessed then
-        if FogEffectEnabled then
-            EnableFogAndAtmosphere()
-            print("Fog and Atmosphere Enabled")
-        else
-            DisableFogAndAtmosphere()
-            print("Fog and Atmosphere Disabled")
-        end
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F5 then
+        ToggleFogAndAtmosphere()
+    elseif input.KeyCode == Enum.KeyCode.F4 then
+        ToggleBrightness()
     end
 end)
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if input.KeyCode == Enum.KeyCode.F4 and not gameProcessed then
-        if BrightEnabled then
-            DisableBright()
-            print("Bright Effect Disabled")
-        else
-            EnableBright()
-            print("Bright Effect Enabled")
-        end
-    end
-end)
-
-print("Combined Script Loaded! Press F4 to toggle brightness, F5 to toggle fog and atmosphere.")
+print("Combined Script Loaded! F4 - Brightness | F5 - Fog/Atmosphere")
